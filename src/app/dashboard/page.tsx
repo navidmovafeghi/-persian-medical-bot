@@ -12,11 +12,14 @@ import {
   Clock,
   TrendingUp,
   ChevronLeft,
-  BarChart
+  BarChart,
+  MessageSquare
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const today = new Date();
@@ -57,14 +60,22 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-center gap-2 bg-white p-3 rounded-lg border border-[#0096c7]/20 shadow-sm min-w-24">
-          <div className="text-center">
-            <div className="font-semibold text-lg text-[#0096c7]">۷۵٪</div>
-            <div className="text-xs text-slate-500">پیشرفت درمان</div>
+        <div className="flex flex-col md:flex-row items-center gap-3">
+          <div className="flex flex-col items-center justify-center gap-2 bg-white p-3 rounded-lg border border-[#0096c7]/20 shadow-sm min-w-24">
+            <div className="text-center">
+              <div className="font-semibold text-lg text-[#0096c7]">۷۵٪</div>
+              <div className="text-xs text-slate-500">پیشرفت درمان</div>
+            </div>
+            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full bg-[#0096c7]" style={{ width: '75%' }}></div>
+            </div>
           </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-            <div className="h-full bg-[#0096c7]" style={{ width: '75%' }}></div>
-          </div>
+          <Link href="/">
+            <Button className="bg-[#0096c7] hover:bg-[#0077b6] text-white flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              گفتگو با دستیار هوشمند
+            </Button>
+          </Link>
         </div>
       </div>
 
