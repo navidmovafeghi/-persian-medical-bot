@@ -34,8 +34,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero section */}
-      <div className="bg-slate-50 rounded-lg p-6 flex flex-col md:flex-row items-center md:justify-between gap-4 border border-[#0096c7]/20 shadow-sm">
+      {/* Hero section - changed from gradient to solid color */}
+      <div className="bg-[#0096c7]/10 rounded-lg p-6 flex flex-col md:flex-row items-center md:justify-between gap-4 border border-[#0096c7]/20 shadow-sm">
         <div className="flex items-center gap-5">
           <Avatar className="w-16 h-16 border-4 border-white shadow-sm hidden md:flex">
             <AvatarImage src="/placeholder-avatar.jpg" alt="علی" />
@@ -108,9 +108,9 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Chart Section */}
+          {/* Chart Section - update card header to solid color */}
           <Card className="border border-slate-200 rounded-md shadow-sm overflow-hidden">
-            <CardHeader className="bg-white border-b border-[#0096c7]/10 py-3">
+            <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 py-3">
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle className="text-base flex items-center">
@@ -135,7 +135,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="bg-white py-2 text-xs text-slate-500 justify-between border-t border-[#0096c7]/10 flex-wrap">
+            <CardFooter className="bg-[#0096c7]/10 py-2 text-xs text-slate-500 justify-between border-t border-[#0096c7]/15 flex-wrap">
               <span>آخرین به‌روزرسانی: دیروز ساعت ۱۸:۳۰</span>
               <button className="text-[#0096c7] hover:text-[#0077b6] transition-colors flex items-center">
                 مشاهده جزئیات
@@ -147,9 +147,9 @@ export default function DashboardPage() {
 
         {/* Right column - Reminders and Health Tips in sidebar */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Today's Schedule Card */}
+          {/* Today's Schedule Card - update card header to solid color */}
           <Card className="border border-slate-200 rounded-md shadow-sm">
-            <CardHeader className="bg-white border-b border-[#0096c7]/10 py-3">
+            <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 py-3">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-base flex items-center">
                   <Clock className="h-4 w-4 ml-1.5 text-[#0096c7]" />
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                 />
               </div>
             </CardContent>
-            <CardFooter className="bg-slate-50 py-2 border-t border-[#0096c7]/10 flex justify-center">
+            <CardFooter className="bg-[#0096c7]/10 py-2 border-t border-[#0096c7]/15 flex justify-center">
               <button className="text-[#0096c7] text-xs font-medium hover:text-[#0077b6] transition-colors flex items-center">
                 مشاهده تقویم کامل
                 <ChevronLeft className="h-3 w-3 mr-1" />
@@ -188,9 +188,9 @@ export default function DashboardPage() {
             </CardFooter>
           </Card>
 
-          {/* Health Tips Card */}
+          {/* Health Tips Card - update card header to solid color */}
           <Card className="border border-slate-200 rounded-md shadow-sm">
-            <CardHeader className="bg-white border-b border-[#0096c7]/10 py-3">
+            <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 py-3">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-base flex items-center">
                   <Heart className="h-4 w-4 ml-1.5 text-[#0096c7]" />
@@ -220,9 +220,9 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Recent Activities Card */}
+          {/* Recent Activities Card - update card header to solid color */}
           <Card className="border border-slate-200 rounded-md shadow-sm">
-            <CardHeader className="bg-white border-b border-[#0096c7]/10 py-3">
+            <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 py-3">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-base flex items-center">
                   <TrendingUp className="h-4 w-4 ml-1.5 text-[#0096c7]" />

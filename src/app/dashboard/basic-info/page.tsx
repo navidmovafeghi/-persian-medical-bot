@@ -77,31 +77,31 @@ export default function BasicInfoPage() {
 
   return (
     <form onSubmit={handleSave} className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="bg-[#0096c7]/10 rounded-lg p-6 flex flex-col md:flex-row items-center md:justify-between gap-4 border border-[#0096c7]/20 shadow-sm">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-800">اطلاعات پایه</h1>
-          <p className="text-slate-600 mt-1">اطلاعات شخصی، تماس، اورژانسی و فیزیکی شما</p>
+          <p className="text-slate-600 mt-2">اطلاعات شخصی، تماس، اورژانسی و فیزیکی شما</p>
         </div>
         <div>
           {isEditing ? (
             <div className="flex gap-2">
-              <Button type="submit" size="sm">
+              <Button type="submit" size="sm" className="bg-[#0096c7] hover:bg-[#0077b6]">
                 <Save className="ml-1 h-4 w-4" /> ذخیره
               </Button>
-              <Button type="button" variant="outline" size="sm" onClick={handleEditToggle}>
+              <Button type="button" variant="outline" size="sm" onClick={handleEditToggle} className="border-[#0096c7] text-[#0096c7]">
                 <X className="ml-1 h-4 w-4" /> لغو
               </Button>
             </div>
           ) : (
-            <Button type="button" variant="outline" size="sm" onClick={handleEditToggle}>
+            <Button type="button" variant="outline" size="sm" onClick={handleEditToggle} className="border-[#0096c7] text-[#0096c7]">
               <Edit className="ml-1 h-4 w-4" /> ویرایش
             </Button>
           )}
         </div>
       </div>
       
-      <Card className="border border-slate-300 rounded-md shadow-inner">
-        <CardHeader className="bg-slate-50 border-b border-[#0096c7]/20 pb-4">
+      <Card className="border border-slate-200 rounded-md shadow-sm">
+        <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
           <CardTitle className="flex items-center">
             <User className="ml-2 h-5 w-5 text-[#0096c7]" />
             اطلاعات شخصی
@@ -161,8 +161,8 @@ export default function BasicInfoPage() {
         </CardContent>
       </Card>
       
-      <Card className="border border-slate-300 rounded-md shadow-inner">
-        <CardHeader className="bg-slate-50 border-b border-[#0096c7]/20 pb-4">
+      <Card className="border border-slate-200 rounded-md shadow-sm">
+        <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
           <CardTitle className="flex items-center">
             <Phone className="ml-2 h-5 w-5 text-[#0096c7]" />
             اطلاعات تماس
@@ -198,8 +198,8 @@ export default function BasicInfoPage() {
         </CardContent>
       </Card>
 
-      <Card className="border border-slate-300 rounded-md shadow-inner">
-        <CardHeader className="bg-slate-50 border-b border-[#0096c7]/20 pb-4">
+      <Card className="border border-slate-200 rounded-md shadow-sm">
+        <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
           <CardTitle className="flex items-center">
             <Contact className="ml-2 h-5 w-5 text-[#0096c7]" />
             مخاطب اضطراری
@@ -235,8 +235,8 @@ export default function BasicInfoPage() {
         </CardContent>
       </Card>
 
-      <Card className="border border-slate-300 rounded-md shadow-inner">
-        <CardHeader className="bg-slate-50 border-b border-[#0096c7]/20 pb-4">
+      <Card className="border border-slate-200 rounded-md shadow-sm">
+        <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
           <CardTitle className="flex items-center">
             <Scale className="ml-2 h-5 w-5 text-[#0096c7]" />
             مشخصات فیزیکی
@@ -279,8 +279,8 @@ export default function BasicInfoPage() {
       </Card>
 
       {/* Insurance Information Card */}
-      <Card className="border border-slate-300 rounded-md shadow-inner">
-        <CardHeader className="bg-slate-50 border-b border-[#0096c7]/20 pb-4">
+      <Card className="border border-slate-200 rounded-md shadow-sm">
+        <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
           <CardTitle className="flex items-center">
             <ShieldCheck className="ml-2 h-5 w-5 text-[#0096c7]" />
             اطلاعات بیمه

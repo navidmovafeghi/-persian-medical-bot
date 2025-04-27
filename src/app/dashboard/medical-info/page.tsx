@@ -90,7 +90,7 @@ export default function MedicalInfoPage() {
   return (
     <form onSubmit={handleSave} className="space-y-6">
       {/* Hero section */}
-      <div className="bg-slate-50 rounded-md p-6 flex flex-col md:flex-row items-center md:justify-between gap-6 border border-[#0096c7]/30">
+      <div className="bg-[#0096c7]/10 rounded-lg p-6 flex flex-col md:flex-row items-center md:justify-between gap-4 border border-[#0096c7]/20 shadow-sm">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-800">اطلاعات پزشکی</h1>
           <p className="text-slate-600 mt-2">سوابق پزشکی و اطلاعات درمانی شما</p>
@@ -123,12 +123,12 @@ export default function MedicalInfoPage() {
           )}
         </div>
       </div>
-
+      
       {/* Main content grid layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Current Medications - spans 2 cols on lg */}
         <Card className="border border-slate-200 rounded-md shadow-inner lg:col-span-2">
-          <CardHeader className="bg-white border-b border-[#0096c7]/20 pb-4">
+          <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="flex items-center">
@@ -141,7 +141,7 @@ export default function MedicalInfoPage() {
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {formData.medications.map((medication, index) => (
                 <div key={index} className="border border-[#0096c7]/20 rounded-lg p-4 bg-white hover:bg-[#0096c7]/5 transition-colors">
                   <h3 className="font-medium text-slate-800">{medication.name}</h3>
@@ -155,7 +155,7 @@ export default function MedicalInfoPage() {
 
         {/* Allergies */}
         <Card className="border border-slate-200 rounded-md shadow-inner">
-          <CardHeader className="bg-white border-b border-[#0096c7]/20 pb-4">
+          <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="flex items-center">
@@ -189,7 +189,7 @@ export default function MedicalInfoPage() {
       
         {/* Conditions - spans 2 cols on lg */}
         <Card className="border border-slate-200 rounded-md shadow-inner lg:col-span-2">
-          <CardHeader className="bg-white border-b border-[#0096c7]/20 pb-4">
+          <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="flex items-center">
@@ -213,9 +213,9 @@ export default function MedicalInfoPage() {
                       <h3 className="font-medium text-slate-800">{condition.name}</h3>
                       <p className="text-sm text-muted-foreground">تشخیص: {condition.diagnosisDate}</p>
                       <p className="text-sm mt-1 text-slate-600">{condition.notes}</p>
-                    </div>
-                  </div>
-                </div>
+          </div>
+        </div>
+      </div>
               ))}
             </div>
           </CardContent>
@@ -223,7 +223,7 @@ export default function MedicalInfoPage() {
 
         {/* Lifestyle Factors */}
         <Card className="border border-slate-200 rounded-md shadow-inner">
-          <CardHeader className="bg-white border-b border-[#0096c7]/20 pb-4">
+          <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
             <CardTitle className="flex items-center">
               <Activity className="ml-2 h-5 w-5 text-[#0096c7]" />
               عوامل سبک زندگی
@@ -253,7 +253,7 @@ export default function MedicalInfoPage() {
 
         {/* Primary Care Physician and Doctors combined */}
         <Card className="border border-slate-200 rounded-md shadow-inner lg:col-span-3">
-          <CardHeader className="bg-white border-b border-[#0096c7]/20 pb-4">
+          <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="flex items-center">
@@ -299,10 +299,10 @@ export default function MedicalInfoPage() {
                         <p className="font-medium text-slate-800 text-sm">{formData.pcpClinic}</p>
                       )}
                     </div>
-                  </div>
-                </div>
-              </div>
-
+          </div>
+        </div>
+      </div>
+      
               {/* Other doctors */}
               <div className="lg:col-span-3">
                 <h3 className="font-medium text-slate-800 mb-3 flex items-center">
@@ -320,17 +320,17 @@ export default function MedicalInfoPage() {
                       </div>
                       <p className="text-sm text-muted-foreground">{doctor.specialty}</p>
                       <p className="text-sm mt-1 text-slate-600">تلفن: {doctor.phone}</p>
-                    </div>
+          </div>
                   ))}
-                </div>
-              </div>
-            </div>
+          </div>
+        </div>
+      </div>
           </CardContent>
         </Card>
 
         {/* Medical History Summary and Family Medical History combined */}
         <Card className="border border-slate-200 rounded-md shadow-inner lg:col-span-3">
-          <CardHeader className="bg-white border-b border-[#0096c7]/20 pb-4">
+          <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 pb-4">
             <CardTitle className="flex items-center">
               <ClipboardList className="ml-2 h-5 w-5 text-[#0096c7]" />
               سوابق پزشکی
@@ -376,7 +376,7 @@ export default function MedicalInfoPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+    </div>
     </form>
   );
 } 
