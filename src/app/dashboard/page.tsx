@@ -2,26 +2,21 @@
 
 import { 
   ArrowDown, 
-  ArrowUp, 
   BarChart3, 
-  ArrowRight, 
   Activity, 
   Heart, 
   Calendar, 
   Pill, 
   Droplets, 
-  Bell, 
   UserRound,
   Clock,
   TrendingUp,
   ChevronLeft,
   BarChart
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 
 export default function DashboardPage() {
   const today = new Date();
