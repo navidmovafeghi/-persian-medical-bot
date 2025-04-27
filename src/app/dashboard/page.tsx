@@ -263,13 +263,17 @@ interface StatCardProps {
 function StatCard({ title, value, icon, trend, badge }: StatCardProps) {
   return (
     <Card className="border border-slate-200 bg-white rounded-md shadow-sm">
-      <CardContent className="p-3">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-xs font-medium text-slate-500">{title}</h3>
+      <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 py-2 px-3">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xs font-medium text-slate-700 flex items-center">
+            {title}
+          </CardTitle>
           <div className="h-6 w-6 rounded-full bg-[#0096c7]/10 flex items-center justify-center">
             {icon}
           </div>
         </div>
+      </CardHeader>
+      <CardContent className="p-3">
         <div className="text-lg font-bold text-slate-800">{value}</div>
         <div className="mt-1.5">
           {trend && (
