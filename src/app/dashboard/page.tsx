@@ -262,8 +262,8 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, trend, badge }: StatCardProps) {
   return (
-    <Card className="border border-slate-200 bg-white rounded-md shadow-sm">
-      <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 py-2 px-3">
+    <Card className="border border-slate-200 bg-white rounded-md shadow-sm overflow-hidden">
+      <CardHeader className="!bg-[#0096c7]/10 !py-2 !px-3 border-b border-[#0096c7]/15 !m-0">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xs font-medium text-slate-700 flex items-center">
             {title}
