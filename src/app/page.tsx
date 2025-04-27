@@ -28,6 +28,14 @@ export default function Home() {
     { text: 'سلام! من دستیار پزشکی هوشمند شما هستم. چطور می‌توانم کمکتان کنم؟', isUser: false, timestamp: new Date() }
   ]);
 
+  const resetConversation = () => {
+    setMessages([
+      { text: 'سلام! من دستیار پزشکی هوشمند شما هستم. چطور می‌توانم کمکتان کنم؟', isUser: false, timestamp: new Date() }
+    ]);
+    setInput('');
+    setIsLoading(false);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -76,7 +84,7 @@ export default function Home() {
       
       {/* Main Chat Area */}
       <main className="flex-1 max-w-5xl w-full mx-auto p-4">
-        <Card className="border border-slate-200 rounded-md shadow-sm h-[calc(100vh-12rem)] flex flex-col overflow-hidden">
+        <Card className="border border-slate-200 rounded-md shadow-sm h-[calc(100vh-12rem)] flex flex-col overflow-hidden p-0">
           {/* Custom header instead of CardHeader */}
           <div className="bg-[#0096c7]/10 py-3 px-6 border-b border-[#0096c7]/15 w-full">
             <div className="flex justify-between items-center">
@@ -84,7 +92,12 @@ export default function Home() {
                 <Bot className="h-4 w-4 ml-1.5 text-[#0096c7]" />
                 مکالمه جدید
               </div>
-              <Button variant="ghost" size="sm" className="text-[#0096c7] hover:bg-[#0096c7]/10">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-[#0096c7] hover:bg-[#0096c7]/10"
+                onClick={resetConversation}
+              >
                 <RefreshCw className="h-3.5 w-3.5 ml-1.5" />
                 شروع مجدد
               </Button>
