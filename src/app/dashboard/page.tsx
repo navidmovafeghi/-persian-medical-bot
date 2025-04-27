@@ -104,14 +104,15 @@ export default function DashboardPage() {
           </div>
 
           {/* Chart Section - update card header to solid color */}
-          <Card className="border border-slate-200 rounded-md shadow-sm overflow-hidden">
-            <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 py-3">
+          <Card className="border border-slate-200 rounded-md shadow-sm overflow-hidden p-0">
+            {/* Custom header instead of CardHeader */}
+            <div className="bg-[#0096c7]/10 py-3 px-6 border-b border-[#0096c7]/15 w-full">
               <div className="flex justify-between items-center">
                 <div>
-                  <CardTitle className="text-base flex items-center">
+                  <div className="text-base font-semibold flex items-center">
                     <BarChart className="h-4 w-4 ml-1.5 text-[#0096c7]" />
                     شاخص‌های سلامت در ۳ ماه گذشته
-                  </CardTitle>
+                  </div>
                 </div>
                 <div className="flex gap-1.5">
                   <Badge variant="outline" className="bg-[#0096c7]/5 border-[#0096c7]/20 text-[#0096c7] text-xs">قند خون</Badge>
@@ -119,7 +120,7 @@ export default function DashboardPage() {
                   <Badge variant="outline" className="bg-[#0096c7]/5 border-[#0096c7]/20 text-[#0096c7] text-xs">وزن</Badge>
                 </div>
               </div>
-            </CardHeader>
+            </div>
             <CardContent className="p-0">
               <div className="h-[250px] bg-white flex items-center justify-center p-6">
                 <div className="text-center space-y-3">
@@ -143,16 +144,17 @@ export default function DashboardPage() {
         {/* Right column - Reminders and Health Tips in sidebar */}
         <div className="lg:col-span-2 space-y-6">
           {/* Today's Schedule Card - update card header to solid color */}
-          <Card className="border border-slate-200 rounded-md shadow-sm">
-            <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 py-3">
+          <Card className="border border-slate-200 rounded-md shadow-sm p-0 overflow-hidden">
+            {/* Custom header instead of CardHeader */}
+            <div className="bg-[#0096c7]/10 py-3 px-6 border-b border-[#0096c7]/15 w-full">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-base flex items-center">
+                <div className="text-base font-semibold flex items-center">
                   <Clock className="h-4 w-4 ml-1.5 text-[#0096c7]" />
                   برنامه امروز
-                </CardTitle>
+                </div>
                 <Badge className="bg-[#0096c7]/15 text-[#0096c7] text-xs">۳ مورد</Badge>
               </div>
-            </CardHeader>
+            </div>
             <CardContent className="p-0">
               <div className="divide-y divide-[#0096c7]/10">
                 <ScheduleItem 
@@ -184,16 +186,17 @@ export default function DashboardPage() {
           </Card>
 
           {/* Health Tips Card - update card header to solid color */}
-          <Card className="border border-slate-200 rounded-md shadow-sm">
-            <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 py-3">
+          <Card className="border border-slate-200 rounded-md shadow-sm p-0 overflow-hidden">
+            {/* Custom header instead of CardHeader */}
+            <div className="bg-[#0096c7]/10 py-3 px-6 border-b border-[#0096c7]/15 w-full">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-base flex items-center">
+                <div className="text-base font-semibold flex items-center">
                   <Heart className="h-4 w-4 ml-1.5 text-[#0096c7]" />
                   توصیه‌های سلامتی
-                </CardTitle>
+                </div>
                 <Badge className="bg-[#0096c7]/15 text-[#0096c7] text-xs">مخصوص شما</Badge>
               </div>
-            </CardHeader>
+            </div>
             <CardContent className="p-0">
               <div className="divide-y divide-[#0096c7]/10">
                 <HealthTip
@@ -216,15 +219,16 @@ export default function DashboardPage() {
           </Card>
 
           {/* Recent Activities Card - update card header to solid color */}
-          <Card className="border border-slate-200 rounded-md shadow-sm">
-            <CardHeader className="bg-[#0096c7]/10 border-b border-[#0096c7]/15 py-3">
+          <Card className="border border-slate-200 rounded-md shadow-sm p-0 overflow-hidden">
+            {/* Custom header instead of CardHeader */}
+            <div className="bg-[#0096c7]/10 py-3 px-6 border-b border-[#0096c7]/15 w-full">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-base flex items-center">
+                <div className="text-base font-semibold flex items-center">
                   <TrendingUp className="h-4 w-4 ml-1.5 text-[#0096c7]" />
                   فعالیت‌های اخیر
-                </CardTitle>
+                </div>
               </div>
-            </CardHeader>
+            </div>
             <CardContent className="p-3">
               <div className="space-y-3">
                 <ActivityItem 
@@ -262,17 +266,16 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, trend, badge }: StatCardProps) {
   return (
-    <Card className="border border-slate-200 bg-white rounded-md shadow-sm overflow-hidden">
-      <CardHeader className="!bg-[#0096c7]/10 !py-2 !px-3 border-b border-[#0096c7]/15 !m-0">
+    <Card className="border border-slate-200 bg-white rounded-md shadow-sm overflow-hidden p-0">
+      {/* Custom header instead of CardHeader */}
+      <div className="bg-[#0096c7]/10 py-2 px-3 border-b border-[#0096c7]/15 w-full">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xs font-medium text-slate-700 flex items-center">
-            {title}
-          </CardTitle>
+          <span className="text-xs font-medium text-slate-700">{title}</span>
           <div className="h-6 w-6 rounded-full bg-[#0096c7]/10 flex items-center justify-center">
             {icon}
           </div>
         </div>
-      </CardHeader>
+      </div>
       <CardContent className="p-3">
         <div className="text-lg font-bold text-slate-800">{value}</div>
         <div className="mt-1.5">
