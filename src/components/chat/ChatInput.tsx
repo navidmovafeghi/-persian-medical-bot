@@ -23,7 +23,12 @@ export function ChatInput({ onSubmit, onReset, isLoading }: ChatInputProps) {
   return (
     <Card className="border-0 shadow-none mt-auto">
       <CardFooter className="flex flex-row items-center p-0 gap-2">
-        <form onSubmit={handleSubmit} className="flex flex-1 rounded-full border bg-background p-1">
+        <form 
+          onSubmit={handleSubmit} 
+          className="flex flex-1 rounded-full border bg-background p-1"
+          aria-label="chat-form"
+          role="form"
+        >
           <input
             type="text"
             placeholder="پیام خود را اینجا بنویسید..."
