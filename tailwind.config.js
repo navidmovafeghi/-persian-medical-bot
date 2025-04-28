@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const { fontFamily } = require("tailwindcss/defaultTheme") // Import default theme
+
 module.exports = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,7 +10,10 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        vazirmatn: ['var(--font-vazirmatn)'],
+        // Keep vazirmatn definition if needed elsewhere
+        vazirmatn: ['var(--font-vazirmatn)'], 
+        // Set sans to use vazirmatn by default, falling back to system UI
+        sans: ["var(--font-vazirmatn)", ...fontFamily.sans],
       },
     },
   },
