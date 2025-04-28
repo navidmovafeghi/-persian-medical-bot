@@ -76,8 +76,8 @@ export default function Sidebar() {
           </Button>
         </SheetTrigger>
         <SheetContent side="right" className="p-0 pr-0">
-          <div className="flex h-full flex-col border-l border-border">
-            <div className="flex items-center p-4 border-b">
+          <div className="flex h-full flex-col border-l border-gray-200 bg-white">
+            <div className="flex items-center p-4 border-b border-gray-200">
               <h2 className="font-bold text-xl">پزشک یار هوشمند</h2>
               <Button
                 variant="ghost"
@@ -97,9 +97,9 @@ export default function Sidebar() {
                     href={item.href}
                     onClick={() => setOpen(false)}
                     className={cn(
-                      "flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground transition-colors",
-                      pathname === item.href && "bg-muted text-foreground",
-                      pathname !== item.href && "hover:bg-muted/50 hover:text-foreground"
+                      "flex items-center gap-2 rounded-lg px-3 py-2 text-gray-700 transition-colors",
+                      pathname === item.href && "bg-gray-100 text-gray-900 font-medium",
+                      pathname !== item.href && "hover:bg-gray-50 hover:text-gray-900"
                     )}
                   >
                     <item.icon className="h-5 w-5 ml-2" />
@@ -113,8 +113,8 @@ export default function Sidebar() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex h-screen border-r border-border flex-col w-64 bg-background sticky top-0">
-        <div className="p-6 border-b border-border flex items-center justify-between">
+      <div className="hidden lg:flex h-screen border-r border-border flex-col w-64 bg-white sticky top-0">
+        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
           <h1 className="font-bold text-lg">پزشک یار هوشمند</h1>
         </div>
         <ScrollArea className="flex-1">
@@ -124,9 +124,9 @@ export default function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground transition-colors",
-                  pathname === item.href && "bg-muted text-foreground",
-                  pathname !== item.href && "hover:bg-muted/50 hover:text-foreground"
+                  "flex items-center gap-2 rounded-lg px-3 py-2 text-gray-700 transition-colors",
+                  pathname === item.href && "bg-gray-100 text-gray-900 font-medium",
+                  pathname !== item.href && "hover:bg-gray-50 hover:text-gray-900"
                 )}
               >
                 <item.icon className="h-5 w-5 ml-2" />
@@ -135,8 +135,8 @@ export default function Sidebar() {
             ))}
           </nav>
         </ScrollArea>
-        <div className="p-4 border-t border-border">
-          <p className="text-center text-sm text-muted-foreground">
+        <div className="p-4 border-t border-gray-200">
+          <p className="text-center text-sm text-gray-500">
             نسخه ۱.۰.۰
           </p>
         </div>
