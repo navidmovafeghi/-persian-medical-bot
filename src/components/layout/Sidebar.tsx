@@ -8,7 +8,9 @@ import {
   LayoutDashboard, Settings, Menu, X
 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
+import { appName, appVersion } from "@/config/ui"; 
+import { config } from "@/config";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -65,6 +67,8 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const sidebarWidth = config.ui.sidebarWidth;
+  const mobileBreakpoint = config.ui.mobileBreakpoint;
 
   return (
     <>
@@ -83,7 +87,7 @@ export default function Sidebar() {
         <SheetContent side="right" className="p-0 pr-0">
           <div className="flex h-full flex-col border-l border-gray-200 bg-white">
             <div className="flex items-center p-4 border-b border-gray-200">
-              <h2 className="font-bold text-xl">پزشک یار هوشمند</h2>
+              <h2 className="font-bold text-xl">{appName}</h2>
               <Button
                 variant="ghost"
                 size="icon"
@@ -118,9 +122,9 @@ export default function Sidebar() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex h-screen border-r border-border flex-col w-64 bg-white sticky top-0">
+      <div className={`hidden lg:flex h-screen border-r border-border flex-col bg-white sticky top-0`} style={{ width: `${sidebarWidth}px` }}>
         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-          <h1 className="font-bold text-lg">پزشک یار هوشمند</h1>
+          <h1 className="font-bold text-lg">{appName}</h1>
         </div>
         <ScrollArea className="flex-1">
           <nav className="grid gap-1 px-2 py-4">
@@ -142,7 +146,7 @@ export default function Sidebar() {
         </ScrollArea>
         <div className="p-4 border-t border-gray-200">
           <p className="text-center text-sm text-gray-500">
-            نسخه ۱.۰.۰
+            نسخه {appVersion}
           </p>
         </div>
       </div>

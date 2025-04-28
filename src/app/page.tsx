@@ -19,7 +19,8 @@ import {
   PanelRightClose,
   User,
   Lightbulb,
-  Stethoscope
+  Stethoscope,
+  Utensils
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
@@ -394,6 +395,16 @@ export default function Home() {
                         داشبورد
                       </Button>
                     </Link>
+                    
+                    <Link href="/food-diary" className="mt-2 block">
+                      <Button 
+                        variant="default"
+                        className="w-full justify-center text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded-md transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+                      >
+                        <Utensils className="ml-2 h-5 w-5" />
+                        دفترچه غذایی
+                      </Button>
+                    </Link>
                   </nav>
                 </SheetContent>
               </Sheet>
@@ -607,6 +618,16 @@ export default function Home() {
             >
               <LayoutDashboard className="ml-2 h-6 w-6" />
               داشبورد
+            </Button>
+          </Link>
+          
+          <Link href="/food-diary" className="mt-3 block">
+            <Button 
+              variant="default"
+              className="w-full justify-center text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 px-3 py-3 rounded-md transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg border-2 border-gray-500"
+            >
+              <Utensils className="ml-2 h-6 w-6" />
+              دفترچه غذایی
             </Button>
           </Link>
         </nav>

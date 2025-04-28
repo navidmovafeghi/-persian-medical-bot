@@ -7,531 +7,696 @@ import {
   Clock,
   Activity,
   Heart,
-  CheckCircle2,
   List,
   MessageSquare,
   PlusCircle,
-  ChevronDown,
   LayoutDashboard,
-  Settings,
-  Info,
   CheckCircle,
-  MoreHorizontal
+  ListChecks,
+  RotateCcw,
+  ArrowUp,
+  ArrowDown,
+  ArrowRight,
+  Trophy,
+  Settings
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TaskCard } from "@/components/dashboard/task-card";
+import { DashboardTask, TrackingTask, FutureTask, GoalOrRecommendationTask, HealthMetric, MetricHistoryPoint, DashboardData, Achievement } from "@/types/dashboard";
+import React from 'react';
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+import { AchievementItem } from "@/components/dashboard/achievement-item";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogTrigger,
+    DialogFooter,
+    DialogClose,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { TaskForm } from "@/components/dashboard/task-form";
+import { v4 as uuidv4 } from 'uuid';
+import { 
+    AlertDialog, 
+    AlertDialogAction, 
+    AlertDialogCancel, 
+    AlertDialogContent, 
+    AlertDialogDescription, 
+    AlertDialogFooter, 
+    AlertDialogHeader, 
+    AlertDialogTitle 
+} from "@/components/ui/alert-dialog";
+import { Suspense } from 'react';
+import { lazyComponent } from '@/utils/code-splitting';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
-// Sample sparkline data (would be real data in production)
-const healthTrends = {
-  glucose: [102, 98, 105, 110, 107, 102],
-  bloodPressure: [120, 118, 125, 122, 119, 120],
-  weight: [78, 78.5, 78.2, 77.9, 78, 78]
+// Lazy-loaded components
+const DashboardStats = lazyComponent(() => import('@/components/dashboard/Stats'));
+const HealthMetricsChart = lazyComponent(() => import('@/components/dashboard/HealthMetricsChart'));
+const RecentMedications = lazyComponent(() => import('@/components/dashboard/RecentMedications'));
+const UpcomingAppointments = lazyComponent(() => import('@/components/dashboard/UpcomingAppointments'));
+
+// Loading placeholders
+const StatsLoading = () => <div className="h-40 bg-gray-100 animate-pulse rounded-lg" />;
+const ChartLoading = () => <div className="h-80 bg-gray-100 animate-pulse rounded-lg" />;
+const ListLoading = () => (
+  <div className="space-y-2">
+    {[1, 2, 3].map((i) => (
+      <div key={i} className="h-16 bg-gray-100 animate-pulse rounded-lg" />
+    ))}
+  </div>
+);
+
+// Temporary placeholder date for calculations - Moved up
+const today = new Date(); 
+
+// Sample Metric Data (More detailed) - Uses today
+const sampleMetrics: HealthMetric[] = [
+  {
+    id: 'bloodSugar', name: 'قند خون', unit: 'mg/dL', currentValue: 102,
+    targetValue: { min: 70, max: 100 }, status: 'warning', trend: 'decreasing',
+    history: [
+        { date: new Date(new Date().setDate(today.getDate() - 6)), value: 110 },
+        { date: new Date(new Date().setDate(today.getDate() - 5)), value: 108 },
+        { date: new Date(new Date().setDate(today.getDate() - 4)), value: 105 },
+        { date: new Date(new Date().setDate(today.getDate() - 3)), value: 103 },
+        { date: new Date(new Date().setDate(today.getDate() - 2)), value: 104 },
+        { date: new Date(new Date().setDate(today.getDate() - 1)), value: 102 },
+    ],
+    lastUpdated: new Date(new Date().setDate(today.getDate() - 1))
+  },
+  {
+    id: 'bloodPressure', name: 'فشار خون', unit: 'mmHg', currentValue: { systolic: 120, diastolic: 80 },
+    targetValue: { systolic: { min: 90, max: 120 }, diastolic: { min: 60, max: 80 } }, status: 'normal', trend: 'stable',
+    history: [
+        { date: new Date(new Date().setDate(today.getDate() - 6)), value: { systolic: 125, diastolic: 82 } },
+        { date: new Date(new Date().setDate(today.getDate() - 5)), value: { systolic: 123, diastolic: 83 } },
+        { date: new Date(new Date().setDate(today.getDate() - 4)), value: { systolic: 122, diastolic: 81 } },
+        { date: new Date(new Date().setDate(today.getDate() - 3)), value: { systolic: 121, diastolic: 81 } },
+        { date: new Date(new Date().setDate(today.getDate() - 2)), value: { systolic: 120, diastolic: 80 } },
+        { date: new Date(new Date().setDate(today.getDate() - 1)), value: { systolic: 120, diastolic: 80 } },
+    ],
+     lastUpdated: new Date(new Date().setDate(today.getDate() - 1))
+  },
+  {
+    id: 'weight', name: 'وزن', unit: 'کیلوگرم', currentValue: 78,
+    targetValue: 75, status: 'warning', trend: 'stable',
+    history: [
+        { date: new Date(new Date().setDate(today.getDate() - 42)), value: 79.5 }, // 6 weeks ago
+        { date: new Date(new Date().setDate(today.getDate() - 21)), value: 78.8 }, // 3 weeks ago
+        { date: new Date(new Date().setDate(today.getDate() - 7)), value: 78.2 }, // 1 week ago
+        { date: new Date(new Date().setDate(today.getDate() - 1)), value: 78 },   // Yesterday
+    ],
+     lastUpdated: new Date(new Date().setDate(today.getDate() - 1))
+  },
+   {
+    id: 'activity', name: 'فعالیت', unit: 'قدم', currentValue: 7500,
+    targetValue: 10000, status: 'warning', trend: 'increasing',
+    history: [
+        { date: new Date(new Date().setDate(today.getDate() - 6)), value: 5200 },
+        { date: new Date(new Date().setDate(today.getDate() - 3)), value: 7100 },
+        { date: new Date(new Date().setDate(today.getDate() - 1)), value: 7500 },
+    ],
+     lastUpdated: new Date(new Date().setDate(today.getDate() - 1))
+  },
+    {
+    id: 'waterIntake', name: 'مصرف آب', unit: 'لیتر', currentValue: 1.8,
+    targetValue: 2.5, status: 'warning', trend: 'increasing',
+    history: [
+        { date: new Date(new Date().setDate(today.getDate() - 6)), value: 1.2 },
+        { date: new Date(new Date().setDate(today.getDate() - 3)), value: 1.5 },
+        { date: new Date(new Date().setDate(today.getDate() - 1)), value: 1.8 },
+    ],
+     lastUpdated: new Date(new Date().setDate(today.getDate() - 1))
+  }
+];
+
+// Sample Achievement Data
+const sampleAchievements: Achievement[] = [
+    {
+        id: 'med-streak-7', title: 'رعایت دارویی - ۷ روز', 
+        description: 'شما ۷ روز متوالی داروهای خود را به موقع مصرف کرده‌اید!',
+        icon: 'Repeat', isAchieved: true, achievedDate: new Date(new Date().setDate(today.getDate() - 1)),
+        category: 'streak'
+    },
+    {
+        id: 'activity-goal-1', title: 'هدف فعالیت هفتگی', 
+        description: 'رسیدن به هدف ۱۰۰۰۰ قدم در ۵ روز هفته.',
+        icon: 'Target', isAchieved: false,
+        category: 'goal'
+    },
+     {
+        id: 'weight-milestone-1', title: 'کاهش وزن - ۱ کیلوگرم', 
+        description: 'اولین گام در مسیر کاهش وزن برداشته شد.',
+        icon: 'Trophy', isAchieved: false, // Assume not achieved yet
+        category: 'milestone'
+    },
+     {
+        id: 'log-consistency-3', title: 'ثبت مداوم - ۳ روز', 
+        description: 'شما ۳ روز متوالی اطلاعات سلامتی خود را ثبت کرده‌اید.',
+        icon: 'Activity', isAchieved: true, achievedDate: new Date(),
+        category: 'consistency'
+    },
+];
+
+const LOCAL_STORAGE_COMPLETED_TASKS_KEY = 'completedTaskIds';
+const LOCAL_STORAGE_SELECTED_METRICS_KEY = 'selectedMetricIds';
+const LOCAL_STORAGE_SELECTED_TIME_RANGE_KEY = 'selectedTimeRange';
+
+const UNDO_TIMEOUT_MS = 5000; // 5 seconds for undo
+
+type TimeRange = 'week' | 'month' | 'year' | 'all';
+
+// --- Personalization Logic Placeholder --- 
+
+/** 
+ * Generates personalized tasks based on user's health metrics.
+ * TODO: Replace this placeholder with actual LLM-driven or rule-based personalization.
+ */
+const generatePersonalizedTasks = (metrics: HealthMetric[]): DashboardTask[] => {
+    const generatedTasks: DashboardTask[] = [];
+    const today = new Date();
+
+    // Example 1: Blood Sugar Warning
+    const bloodSugar = metrics.find(m => m.id === 'bloodSugar');
+    if (bloodSugar && bloodSugar.status === 'warning') {
+        generatedTasks.push({
+            id: 'gen-task-glucose', title: 'اندازه‌گیری قند خون (ناشتا)', category: 'measurement',
+            priority: 'high', isCompleted: false, dueDate: new Date(), 
+            metricId: 'bloodSugar', frequency: 'روزانه', normalRange: '70-100 mg/dL',
+            notes: 'قند خون شما کمی بالاست، لطفاً روزانه چک کنید.'
+        });
+    }
+
+    // Example 2: Weight Goal / Warning
+    const weight = metrics.find(m => m.id === 'weight');
+    if (weight && weight.targetValue && weight.status === 'warning') {
+         generatedTasks.push({
+            id: 'gen-task-weight-measure', title: 'اندازه‌گیری وزن', category: 'measurement',
+            priority: 'medium', isCompleted: false, dueDate: new Date(today.setDate(today.getDate() + (7 - today.getDay()))), // Next Sunday
+            metricId: 'weight', frequency: 'هفتگی', normalRange: 'BMI: 18.5-24.9'
+        });
+         generatedTasks.push({
+            id: 'gen-task-weight-goal', title: 'تمرکز بر هدف وزنی', category: 'goal',
+            priority: 'medium', isCompleted: false,
+            description: `هدف فعلی ${weight.targetValue} کیلوگرم است. رژیم و فعالیت را ادامه دهید.`, 
+            actionText: 'مشاهده برنامه غذایی' // Placeholder action
+        });
+    }
+    
+    // Example 3: Activity Goal
+    const activity = metrics.find(m => m.id === 'activity');
+    if (activity && typeof activity.currentValue === 'number' && typeof activity.targetValue === 'number' && activity.currentValue < activity.targetValue) {
+        generatedTasks.push({
+            id: 'gen-task-activity', title: 'افزایش فعالیت روزانه', category: 'activity',
+            priority: 'medium', isCompleted: false, dueDate: new Date(),
+            description: `هدف ${activity.targetValue} قدم است. امروز ${activity.targetValue - activity.currentValue} قدم دیگر لازم است.`, 
+            actionText: 'شروع پیاده‌روی'
+        });
+    }
+
+    // Example 4: Stable Blood Pressure Reminder (less frequent check)
+    const bloodPressure = metrics.find(m => m.id === 'bloodPressure');
+    if (bloodPressure && bloodPressure.status === 'normal' && bloodPressure.trend === 'stable') {
+        generatedTasks.push({
+            id: 'gen-task-bp-stable', title: 'اندازه‌گیری فشار خون (هفتگی)', category: 'measurement',
+            priority: 'low', isCompleted: false, dueDate: new Date(today.setDate(today.getDate() + (7 - today.getDay()))), // Next Sunday
+            metricId: 'bloodPressure', frequency: 'هفتگی', normalRange: 'زیر ۱۲۰/۸۰ mmHg'
+        });
+    }
+    
+    // Add a static medication reminder example (could also be generated)
+    generatedTasks.push({
+        id: 'static-task-med-am', title: 'مصرف متفورمین (صبح)', category: 'medication',
+        priority: 'high', isCompleted: false, dueDate: new Date(), 
+        scheduledTime: 'بعد از صبحانه', details: '۵۰۰ میلی‌گرم'
+      });
+
+    return generatedTasks;
 };
 
 export default function DashboardPage() {
-  const today = new Date();
   const persianDate = new Intl.DateTimeFormat('fa-IR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
+    year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
   }).format(today);
 
-  // State for personalization preferences
-  const [viewMode, setViewMode] = useState<'detailed' | 'compact'>('detailed');
-  const [medicationStreak, setMedicationStreak] = useState(7); // Sample streak count
+  // --- State Management --- 
+  const [tasks, setTasks] = useState<DashboardTask[]>([]);
+  const [isMetricModalOpen, setIsMetricModalOpen] = useState(false);
+  const [dashboardData, setDashboardData] = useState<DashboardData>(() => {
+      // Load selectedMetricIds from localStorage or use default
+      const storedMetricIdsString = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_SELECTED_METRICS_KEY) : null;
+      const initialSelectedIds = storedMetricIdsString 
+          ? JSON.parse(storedMetricIdsString) 
+          : ['bloodSugar', 'bloodPressure', 'weight', 'activity']; // Default
 
-  // Toggles between detailed and compact view
-  const toggleViewMode = () => {
-    setViewMode(viewMode === 'detailed' ? 'compact' : 'detailed');
+      // Initial load - tasks will be generated in useEffect
+      return {
+          user: { name: "علی", avatarUrl: "/placeholder-avatar.jpg" },
+          currentDate: today,
+          allMetrics: sampleMetrics,
+          selectedMetricIds: initialSelectedIds,
+          tasks: [], // Start empty, generated in useEffect
+          achievements: sampleAchievements
+      };
+  });
+
+  const [pendingUndo, setPendingUndo] = useState<{ taskId: string; timeoutId: NodeJS.Timeout } | null>(null);
+  const taskStateBeforeUndo = useRef<DashboardTask[]>([]);
+  
+  // Load selectedTimeRange from localStorage or use default
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange>(() => {
+      if (typeof window === 'undefined') return 'month'; // Default for SSR
+      const storedTimeRange = localStorage.getItem(LOCAL_STORAGE_SELECTED_TIME_RANGE_KEY) as TimeRange | null;
+      return storedTimeRange || 'month'; // Default to 'month'
+  }); 
+
+  const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false); 
+  const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] = useState(false); // State for Edit Task Dialog
+  const [taskToEdit, setTaskToEdit] = useState<DashboardTask | null>(null); // State for task being edited
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for Delete Confirmation Dialog
+  const [taskToDeleteId, setTaskToDeleteId] = useState<string | null>(null); // State for task ID pending deletion
+
+  // Load initial tasks (GENERATED) and apply completion status
+  useEffect(() => {
+    // Generate tasks based on the initial metrics
+    const generated = generatePersonalizedTasks(dashboardData.allMetrics);
+
+    const storedCompletedIdsString = localStorage.getItem(LOCAL_STORAGE_COMPLETED_TASKS_KEY);
+    const completedIds = storedCompletedIdsString ? JSON.parse(storedCompletedIdsString) : [];
+
+    // Apply completion status to the generated tasks
+    const initialTasks = generated.map(task => ({
+      ...task,
+      isCompleted: completedIds.includes(task.id)
+    }));
+
+    setDashboardData(prevData => ({ ...prevData, tasks: initialTasks }));
+    setTasks(initialTasks);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
+  // --- Persistence Effects ---
+
+  // Persist selectedMetricIds
+  useEffect(() => {
+      if (dashboardData.selectedMetricIds) {
+          localStorage.setItem(LOCAL_STORAGE_SELECTED_METRICS_KEY, JSON.stringify(dashboardData.selectedMetricIds));
+      }
+  }, [dashboardData.selectedMetricIds]);
+
+  // Persist selectedTimeRange
+  useEffect(() => {
+      localStorage.setItem(LOCAL_STORAGE_SELECTED_TIME_RANGE_KEY, selectedTimeRange);
+  }, [selectedTimeRange]);
+
+  // Clear undo timeout on component unmount (remains the same)
+  useEffect(() => {
+    return () => { if (pendingUndo) clearTimeout(pendingUndo.timeoutId); };
+  }, [pendingUndo]);
+
+  // Function to apply task change (updates both tasks and dashboardData.tasks)
+   const applyTaskChange = (taskId: string, newCompletedStatus: boolean) => {
+    let finalUpdatedTasks: DashboardTask[] = [];
+    setTasks(currentTasks => {
+      finalUpdatedTasks = currentTasks.map(task => 
+          task.id === taskId ? { ...task, isCompleted: newCompletedStatus } : task
+      );
+       // Update localStorage
+      const completedIds = finalUpdatedTasks
+        .filter(task => task.isCompleted)
+        .map(task => task.id);
+      localStorage.setItem(LOCAL_STORAGE_COMPLETED_TASKS_KEY, JSON.stringify(completedIds));
+      // Update tasks in dashboardData as well
+      setDashboardData(prevData => ({ ...prevData, tasks: finalUpdatedTasks }));
+      return finalUpdatedTasks;
+    });
+    console.log(`Applied completion change for task: ${taskId}`);
+    setPendingUndo(null); 
   };
 
-  // Simulates marking a task as complete
-  const markComplete = (taskId: string) => {
-    // Would update state and API in real implementation
-    console.log(`Task ${taskId} marked as complete`);
-    // For demo, increment streak if it's a medication task
-    if (taskId.includes('medication')) {
-      setMedicationStreak(medicationStreak + 1);
+  // Toggle completion handler (initiates undo)
+  const handleToggleComplete = (taskId: string) => {
+      if (pendingUndo) {
+        clearTimeout(pendingUndo.timeoutId);
+        setPendingUndo(null);
+    }
+    taskStateBeforeUndo.current = tasks; 
+    const taskToToggle = tasks.find(task => task.id === taskId);
+    if (!taskToToggle) return;
+    const newCompletedStatus = !taskToToggle.isCompleted;
+    const timeoutId = setTimeout(() => {
+        applyTaskChange(taskId, newCompletedStatus);
+    }, UNDO_TIMEOUT_MS);
+    setPendingUndo({ taskId, timeoutId });
+    console.log(`Initiated toggle for task: ${taskId}.`);
+  };
+
+  // Undo handler (reverts both tasks and dashboardData.tasks)
+  const handleUndo = (taskId: string) => {
+    if (pendingUndo && pendingUndo.taskId === taskId) {
+        clearTimeout(pendingUndo.timeoutId); 
+        setTasks(taskStateBeforeUndo.current); // Revert tasks state
+        setDashboardData(prevData => ({ ...prevData, tasks: taskStateBeforeUndo.current })); // Revert in dashboardData
+        setPendingUndo(null); 
+        console.log(`Undo toggled completion for task: ${taskId}`);
     }
   };
 
-  // Mini sparkline component
-  const SparkLine = ({ data, color }: { data: number[], color: string }) => {
-    const max = Math.max(...data);
-    const min = Math.min(...data);
-    const range = max - min;
+  // Handle Add Task Submission (This function needs to be present)
+  const handleAddTask = (newTaskData: Omit<DashboardTask, 'id' | 'isCompleted'>) => {
+      // Create a base task object with required fields and default/placeholder values
+      // for fields specific to certain task types to satisfy the union type.
+      const newTask: DashboardTask = {
+          id: uuidv4(), 
+          isCompleted: false,
+          ...newTaskData, // Spread the data from the form
+          
+          // Add placeholder/default values for fields required by specific types
+          // These might need refinement or proper handling later based on category
+          metricId: newTaskData.category === 'measurement' ? 'placeholder_metric' : undefined, // Required by TrackingTask
+          frequency: newTaskData.category === 'measurement' ? 'روزانه' : undefined, // Required by TrackingTask
+          description: newTaskData.category === 'goal' || newTaskData.category === 'nutrition' ? 'توضیحات پیش فرض' : undefined, // Required by GoalOrRecommendationTask
+          actionText: newTaskData.category === 'goal' || newTaskData.category === 'nutrition' ? 'اقدام پیش فرض' : undefined, // Required by GoalOrRecommendationTask
+      } as DashboardTask;
+      
+      // Add to both state variables
+      setTasks(currentTasks => [...currentTasks, newTask]);
+      setDashboardData(prevData => ({ 
+          ...prevData, 
+          tasks: [...prevData.tasks, newTask] 
+      }));
+      
+      console.log("Added Task:", newTask);
+      setIsAddTaskDialogOpen(false); // Close the dialog
+  };
+
+  // Handle Opening the Edit Dialog
+  const handleOpenEditDialog = (taskId: string) => {
+      const task = tasks.find(t => t.id === taskId);
+      if (task) {
+          setTaskToEdit(task);
+          setIsEditTaskDialogOpen(true);
+          console.log("Editing Task:", task);
+      } else {
+          console.error("Task not found for editing:", taskId);
+      }
+  };
+
+  // Handle Edit Task Submission
+  const handleEditTask = (updatedTaskData: Omit<DashboardTask, 'id' | 'isCompleted'>) => {
+      if (!taskToEdit) return; 
+
+      const updatedTask: DashboardTask = {
+          ...taskToEdit, // Keep original id and isCompleted status
+          ...updatedTaskData, // Apply changes from form
+          // Re-apply placeholder/default values logic similar to handleAddTask
+          // to ensure type correctness based on the *potentially changed* category
+          metricId: updatedTaskData.category === 'measurement' ? (taskToEdit as TrackingTask)?.metricId || 'placeholder_metric' : undefined, 
+          frequency: updatedTaskData.category === 'measurement' ? (taskToEdit as TrackingTask)?.frequency || 'روزانه' : undefined, 
+          description: updatedTaskData.category === 'goal' || updatedTaskData.category === 'nutrition' ? (taskToEdit as GoalOrRecommendationTask)?.description || 'توضیحات پیش فرض' : undefined,
+          actionText: updatedTaskData.category === 'goal' || updatedTaskData.category === 'nutrition' ? (taskToEdit as GoalOrRecommendationTask)?.actionText || 'اقدام پیش فرض' : undefined,
+      } as DashboardTask;
+
+      // Update both state variables
+      setTasks(currentTasks => 
+          currentTasks.map(t => t.id === taskToEdit.id ? updatedTask : t)
+      );
+      setDashboardData(prevData => ({ 
+          ...prevData, 
+          tasks: prevData.tasks.map(t => t.id === taskToEdit.id ? updatedTask : t)
+      }));
+
+      console.log("Updated Task:", updatedTask);
+      setIsEditTaskDialogOpen(false); // Close the dialog
+      setTaskToEdit(null); // Reset task being edited
+  };
+
+  // Handle Opening Delete Confirmation
+  const handleOpenDeleteDialog = (taskId: string) => {
+      console.log("Requesting delete confirmation for Task:", taskId);
+      setTaskToDeleteId(taskId);
+      setIsDeleteDialogOpen(true);
+  };
+
+  // Handle Confirming Task Deletion
+  const confirmDeleteTask = () => {
+      if (!taskToDeleteId) return;
+      
+      console.log("Confirmed Deleting Task:", taskToDeleteId);
+
+      const taskWasCompleted = tasks.find(t => t.id === taskToDeleteId)?.isCompleted || false;
+
+      // Remove from both state variables
+      setTasks(currentTasks => currentTasks.filter(t => t.id !== taskToDeleteId));
+      setDashboardData(prevData => ({ 
+          ...prevData, 
+          tasks: prevData.tasks.filter(t => t.id !== taskToDeleteId) 
+      }));
+
+      // Update localStorage for completed tasks if the deleted task was completed
+      if (taskWasCompleted) {
+           const storedCompletedIdsString = localStorage.getItem(LOCAL_STORAGE_COMPLETED_TASKS_KEY);
+          if (storedCompletedIdsString) {
+              let completedIds = JSON.parse(storedCompletedIdsString);
+              if (completedIds.includes(taskToDeleteId)) {
+                  completedIds = completedIds.filter((id: string) => id !== taskToDeleteId);
+                  localStorage.setItem(LOCAL_STORAGE_COMPLETED_TASKS_KEY, JSON.stringify(completedIds));
+              }
+          }
+      }
+      
+      // Close dialog and reset state
+      setIsDeleteDialogOpen(false);
+      setTaskToDeleteId(null);
+  };
+
+ // --- Sorting and Filtering Logic (using tasks state) --- 
+  const priorityOrder: Record<DashboardTask['priority'], number> = { 'high': 1, 'medium': 2, 'low': 3, 'optional': 4 };
+  const sortTasks = (taskList: DashboardTask[]) => {
+      // Ensure taskList is always an array before sorting
+    const listToSort = Array.isArray(taskList) ? taskList : [];
+     return [...listToSort].sort((a, b) => { // Use spread to avoid mutating original array directly if needed elsewhere
+      if (a.isCompleted !== b.isCompleted) return a.isCompleted ? 1 : -1;
+      const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+      if (priorityDiff !== 0) return priorityDiff;
+      return (a.dueDate?.getTime() ?? Infinity) - (b.dueDate?.getTime() ?? Infinity);
+    });
+  };
+  // Ensure tasks used in filters is always an array
+  const currentTasks = Array.isArray(tasks) ? tasks : [];
+  const todayTasks = sortTasks(currentTasks.filter(task => task.dueDate && task.dueDate.toDateString() === today.toDateString()));
+  const upcomingTasks = sortTasks(currentTasks.filter(task => task.dueDate && task.dueDate > today));
+  const measurementTasks = sortTasks(currentTasks.filter(task => task.category === 'measurement'));
+  const recommendations = sortTasks(currentTasks.filter(task => ['nutrition', 'activity', 'lifestyle', 'goal', 'mental'].includes(task.category)));
+  
+  // --- Helper Functions --- 
+
+   // Get Trend Icon
+  const getTrendIcon = (trend?: 'increasing' | 'decreasing' | 'stable') => {
+    switch(trend) {
+      case "increasing": return <ArrowUp className="h-3 w-3 text-green-500" />;
+      case "decreasing": return <ArrowDown className="h-3 w-3 text-red-500" />;
+      case "stable": return <ArrowRight className="h-3 w-3 text-amber-500" />;
+      default: return null;
+    }
+  };
+
+  // Get Status Indicator Style
+  const getStatusIndicatorClass = (status?: 'good' | 'warning' | 'danger' | 'normal') => {
+    switch(status) {
+      case "good": case "normal": return "bg-green-500";
+      case "warning": return "bg-amber-500";
+      case "danger": return "bg-red-500";
+      default: return "bg-slate-400";
+    }
+  };
+
+  // Calculate Progress Percentage (simplified version)
+  const calculateMetricProgress = (metric: HealthMetric): number | null => {
+    if (!metric.targetValue || typeof metric.currentValue !== 'number' || typeof metric.targetValue !== 'number') {
+      // Handle BP, range targets, or missing targets - return null for now
+      // More complex logic needed for these cases
+      if (metric.id === 'bloodPressure') return null; // No simple progress for BP
+      if (typeof metric.targetValue === 'object' && metric.targetValue !== null && ('min' in metric.targetValue || 'systolic' in metric.targetValue) ) return null; // No simple progress for ranges yet
+      if (typeof metric.currentValue !== 'number' || typeof metric.targetValue !== 'number') return null; // Ensure numeric comparison
+    }
     
+    const target = metric.targetValue as number;
+    const current = metric.currentValue as number;
+    
+    // Avoid division by zero if target is 0 or current equals target
+    if (target === 0) return current === 0 ? 100 : null;
+    if (current === target) return 100;
+
+    // Simple percentage towards target (assumes target is the goal, not a limit)
+    // This might need adjustment based on whether higher or lower is better
+    let progress = (current / target) * 100;
+
+    // If the goal is to decrease (e.g., weight loss) and current > target
+    // A more intuitive progress might be how much of the excess is reduced.
+    // This needs initial value, which we don't have easily here. Sticking to simple % for now.
+    // Example: target 75, current 78 -> progress 104%. We might want to show negative progress or % completion based on starting point.
+    
+    return Math.max(0, Math.min(100, progress)); // Cap progress between 0 and 100
+  };
+
+  // Filter Metric History based on Time Range
+  const filterMetricHistory = (history: MetricHistoryPoint[], range: TimeRange): MetricHistoryPoint[] => {
+      const now = new Date();
+      let startDate: Date | null = null;
+
+      switch(range) {
+          case 'week':
+              startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6); // Last 7 days including today
+              break;
+          case 'month':
+              startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()); // Last month approx.
+              break;
+          case 'year':
+              startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()); // Last year approx.
+              break;
+          case 'all':
+          default:
+              return history; // Return all history
+      }
+      
+      if (!startDate) return history;
+      
+      return history.filter(point => point.date >= startDate! && point.date <= now)
+                    .sort((a, b) => a.date.getTime() - b.date.getTime()); // Ensure sorted
+  };
+
+  // --- Rendering Logic --- 
+
+  // Get the metrics selected for display
+  const selectedMetrics = dashboardData.allMetrics.filter(metric => 
+      dashboardData.selectedMetricIds.includes(metric.id)
+  );
+
+  // SparkLine component (remains the same)
+   const SparkLine = ({ data, color }: { data: (number | { systolic: number; diastolic: number })[], color: string }) => {
+    // Ensure data is an array before processing
+    if (!Array.isArray(data) || data.length === 0) {
+        return <svg className="w-16 h-6 overflow-visible" viewBox="0 0 100 20" preserveAspectRatio="none"></svg>; // Return empty SVG if no data
+    }
+
+    const values = data.flatMap(d => typeof d === 'number' ? d : [d.systolic, d.diastolic]);
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const range = max - min || 1; // Avoid division by zero if all values are the same
+    
+    const points = data.map((_value, index) => {
+        const x = (index / (data.length - 1 || 1)) * 100;
+        return x;
+    });
+
     return (
-      <div className="flex items-end h-6 gap-[2px]">
+      <svg className="w-16 h-6 overflow-visible" viewBox="0 0 100 20" preserveAspectRatio="none">
         {data.map((value, index) => {
-          const height = range === 0 ? 50 : ((value - min) / range) * 100;
-          return (
-            <div 
-              key={index}
-              style={{ 
-                height: `${Math.max(15, height)}%`,
-                backgroundColor: color,
-                width: '4px',
-                borderRadius: '1px'
-              }}
-              className={`${index === data.length - 1 ? 'opacity-100' : 'opacity-60'}`}
-            />
-          );
+           // Type guard for history value
+           const numericValue = typeof value === 'number' ? value : value.systolic;
+           const prevHistoryPoint = index > 0 ? data[index-1] : value;
+           const prevNumericValue = typeof prevHistoryPoint === 'number' ? prevHistoryPoint : prevHistoryPoint.systolic;
+
+           const y = 20 - (((numericValue) - min) / range) * 20 * 0.8 - 2; // Adjust y calculation for viewbox
+           const prevY = index > 0 ? 20 - (((prevNumericValue) - min) / range) * 20 * 0.8 - 2 : y;
+           
+           return (
+            <React.Fragment key={index}>
+                {index > 0 && (
+                     <line 
+                        x1={points[index-1]}
+                        y1={prevY}
+                        x2={points[index]}
+                        y2={y}
+                        stroke={color}
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                    />
+                )}
+                 {/* Optional: Add circles for points */}
+                 {/* <circle cx={points[index]} cy={y} r="1" fill={color} /> */} 
+            </React.Fragment>
+           )
         })}
-      </div>
+       </svg>
     );
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Welcome header without card container */}
-      <div className="flex flex-col md:flex-row items-center md:justify-between gap-4 mb-2">
-        <div className="flex items-center gap-5">
-          <Avatar className="w-16 h-16 border-4 border-white shadow-sm hidden md:flex">
-            <AvatarImage src="/placeholder-avatar.jpg" alt="علی" />
-            <AvatarFallback className="text-xl bg-gray-100 text-slate-600">ع</AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-800">سلام، علی!</h1>
-            </div>
-            <p className="text-slate-600 mt-1 text-sm">{persianDate}</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  onClick={toggleViewMode}
-                  variant="outline" 
-                  size="icon" 
-                  className="border-slate-200"
-                  aria-label="تغییر حالت نمایش"
-                >
-                  <LayoutDashboard className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>تغییر حالت نمایش</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+  // Function to handle metric selection changes
+  const handleMetricSelectionChange = (metricId: string, isSelected: boolean) => {
+      setDashboardData(prevData => {
+          const newSelectedIds = isSelected
+              ? [...prevData.selectedMetricIds, metricId]
+              : prevData.selectedMetricIds.filter(id => id !== metricId);
           
-          <Link href="/">
-            <Button className="bg-[#c19a48] hover:bg-[#a17c34] text-white flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              گفتگو با دستیار هوشمند
-            </Button>
-          </Link>
-        </div>
-      </div>
+          // Persist to localStorage
+          if (typeof window !== 'undefined') {
+              localStorage.setItem(LOCAL_STORAGE_SELECTED_METRICS_KEY, JSON.stringify(newSelectedIds));
+          }
 
-      {/* Health metrics visualization strip */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border border-slate-200 rounded-md shadow-sm overflow-hidden">
-          <div className="flex justify-between items-center p-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-red-100 p-2 rounded-full">
-                <Activity className="h-4 w-4 text-red-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-600">قند خون</p>
-                <p className="text-lg font-bold text-slate-800">۱۰۲ mg/dL</p>
-              </div>
-            </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex flex-col ml-2">
-                    <SparkLine data={healthTrends.glucose} color="#f87171" />
-                    <div className="flex justify-between text-xs text-slate-500 mt-1">
-                      <span>هفته گذشته</span>
-                    </div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>محدوده نرمال: ۷۰-۱۰۰ mg/dL</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </Card>
-        
-        <Card className="border border-slate-200 rounded-md shadow-sm overflow-hidden">
-          <div className="flex justify-between items-center p-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-100 p-2 rounded-full">
-                <Heart className="h-4 w-4 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-600">فشار خون</p>
-                <p className="text-lg font-bold text-slate-800">۱۲۰/۸۰ mmHg</p>
-              </div>
-            </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex flex-col ml-2">
-                    <SparkLine data={healthTrends.bloodPressure} color="#60a5fa" />
-                    <div className="flex justify-between text-xs text-slate-500 mt-1">
-                      <span>هفته گذشته</span>
-                    </div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>محدوده نرمال: ۹۰/۶۰ تا ۱۲۰/۸۰ mmHg</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </Card>
-        
-        <Card className="border border-slate-200 rounded-md shadow-sm overflow-hidden">
-          <div className="flex justify-between items-center p-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-green-100 p-2 rounded-full">
-                <UserRound className="h-4 w-4 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-600">وزن</p>
-                <p className="text-lg font-bold text-slate-800">۷۸ کیلوگرم</p>
-              </div>
-            </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex flex-col ml-2">
-                    <SparkLine data={healthTrends.weight} color="#4ade80" />
-                    <div className="flex justify-between text-xs text-slate-500 mt-1">
-                      <span>هفته گذشته</span>
-                    </div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>هدف: ۷۵ کیلوگرم</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </Card>
-      </div>
-
-      {/* Combined card for both tracking items and future tasks */}
-      <Card className="border border-slate-200 rounded-md shadow-sm p-0 overflow-hidden">
-        <CardHeader className="bg-[#e6bf7a]/10 py-4 px-6 border-b border-[#e6bf7a]/15">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-lg font-semibold flex items-center">
-              <List className="h-5 w-5 ml-2 text-[#c19a48]" />
-              پیگیری و برنامه‌های آینده
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-slate-600 hover:text-slate-900 hover:bg-[#e6bf7a]/10"
-                aria-label="ثبت اطلاعات جدید"
-              >
-                <PlusCircle className="h-4 w-4 ml-1" />
-                <span className="text-sm">ثبت جدید</span>
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x lg:divide-x-reverse divide-[#e6bf7a]/10">
-            {/* Left section - What needs to be tracked */}
-            <div className="divide-y divide-[#e6bf7a]/10">
-              <div className="p-4 bg-[#e6bf7a]/5">
-                <h3 className="font-semibold text-slate-700 flex items-center">
-                  <List className="h-4 w-4 ml-2 text-[#c19a48]" />
-                  موارد نیازمند پیگیری
-                </h3>
-              </div>
-              
-              {/* Enhanced TrackingItem with visual indicators for "today" and contextual actions */}
-              <EnhancedTrackingItem
-                id="glucose"
-                title="قند خون"
-                value="۱۰۲ mg/dL"
-                dueDate="امروز"
-                icon={<Activity className="h-4 w-4 text-[#c19a48]" />}
-                status="نیاز به اندازه‌گیری"
-                isUrgent={true}
-                normalRange="70-100 mg/dL"
-                onAction={() => markComplete('glucose')}
-                viewMode={viewMode}
-              />
-              <EnhancedTrackingItem
-                id="bloodpressure"
-                title="فشار خون"
-                value="۱۲۰/۸۰ mmHg"
-                dueDate="فردا"
-                icon={<Heart className="h-4 w-4 text-[#c19a48]" />}
-                status="نیاز به اندازه‌گیری"
-                isUrgent={false}
-                normalRange="90/60 تا 120/80 mmHg"
-                onAction={() => markComplete('bloodpressure')}
-                viewMode={viewMode}
-              />
-              <EnhancedTrackingItem
-                id="weight"
-                title="وزن"
-                value="۷۸ کیلوگرم"
-                dueDate="هفته آینده"
-                icon={<UserRound className="h-4 w-4 text-[#c19a48]" />}
-                status="نیاز به اندازه‌گیری"
-                isUrgent={false}
-                normalRange="BMI: 18.5-24.9"
-                onAction={() => markComplete('weight')}
-                viewMode={viewMode}
-              />
-              <EnhancedTrackingItem
-                id="medication"
-                title="مصرف داروها"
-                value="متفورمین، آتورواستاتین"
-                dueDate="روزانه"
-                icon={<Pill className="h-4 w-4 text-[#c19a48]" />}
-                status={`پیگیری مستمر (${medicationStreak} روز پیاپی)`}
-                isUrgent={true}
-                normalRange="طبق تجویز پزشک"
-                onAction={() => markComplete('medication')}
-                viewMode={viewMode}
-                showStreak={true}
-                streak={medicationStreak}
-              />
-            </div>
-            
-            {/* Right section - What needs to be done */}
-            <div className="divide-y divide-[#e6bf7a]/10">
-              <div className="p-4 bg-[#e6bf7a]/5">
-                <h3 className="font-semibold text-slate-700 flex items-center">
-                  <Calendar className="h-4 w-4 ml-2 text-[#c19a48]" />
-                  برنامه‌های آینده
-                </h3>
-              </div>
-              <EnhancedFutureTaskItem
-                id="medication-task"
-                title="مصرف دارو - متفورمین"
-                time="امروز - ۱۸:۰۰"
-                icon={<Pill className="h-4 w-4 text-[#c19a48]" />}
-                type="دارو"
-                priority="ضروری"
-                viewMode={viewMode}
-                onAction={() => markComplete('medication-task')}
-                isToday={true}
-              />
-              <EnhancedFutureTaskItem
-                id="doctor-visit"
-                title="ویزیت دکتر محمدی"
-                time="فردا - ۱۰:۳۰"
-                icon={<UserRound className="h-4 w-4 text-[#c19a48]" />}
-                type="ویزیت"
-                priority="مهم"
-                viewMode={viewMode}
-                onAction={() => markComplete('doctor-visit')}
-                isToday={false}
-              />
-              <EnhancedFutureTaskItem
-                id="blood-test"
-                title="آزمایش خون"
-                time="پس‌فردا - ۸:۰۰"
-                icon={<Activity className="h-4 w-4 text-[#c19a48]" />}
-                type="آزمایش"
-                priority="مهم"
-                viewMode={viewMode}
-                onAction={() => markComplete('blood-test')}
-                isToday={false}
-              />
-              <EnhancedFutureTaskItem
-                id="result-review"
-                title="بررسی نتایج آزمایش"
-                time="هفته آینده - ۱۵:۰۰"
-                icon={<CheckCircle2 className="h-4 w-4 text-[#c19a48]" />}
-                type="پیگیری"
-                priority="متوسط"
-                viewMode={viewMode}
-                onAction={() => markComplete('result-review')}
-                isToday={false}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Quick action floating button - mobile only */}
-      <div className="fixed bottom-6 right-6 md:hidden">
-        <Button 
-          size="icon" 
-          className="h-12 w-12 rounded-full shadow-lg bg-[#c19a48] hover:bg-[#a17c34]" 
-          aria-label="اقدامات سریع"
-        >
-          <PlusCircle className="h-6 w-6" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// Enhanced component for tracking items with better UI/UX
-interface EnhancedTrackingItemProps {
-  id: string;
-  title: string;
-  value: string;
-  dueDate: string;
-  icon: React.ReactNode;
-  status: string;
-  isUrgent: boolean;
-  normalRange: string;
-  onAction: () => void;
-  viewMode: 'detailed' | 'compact';
-  showStreak?: boolean;
-  streak?: number;
-}
-
-function EnhancedTrackingItem({ 
-  id, title, value, dueDate, icon, status, isUrgent, normalRange, onAction, viewMode, showStreak, streak 
-}: EnhancedTrackingItemProps) {
-  // Pulse animation for urgent items
-  const urgentStyle = isUrgent 
-    ? viewMode === 'detailed' 
-      ? 'border-r-4 border-r-red-400 animate-pulse bg-red-50/30' 
-      : 'border-r-4 border-r-red-400'
-    : '';
-  
-  return (
-    <div className={`flex items-center justify-between p-4 hover:bg-[#e6bf7a]/5 transition-colors ${urgentStyle}`}>
-      <div className="flex items-center gap-3">
-        <div className="bg-[#e6bf7a]/15 p-2 rounded-full">
-          {icon}
-        </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium text-slate-800">{title}</h3>
-            {showStreak && streak && streak > 5 && (
-              <Badge className="bg-green-100 text-green-700 border-0 text-xs">
-                🔥 {streak} روز
-              </Badge>
-            )}
-          </div>
-          <p className="text-sm text-slate-600">{value}</p>
-          {viewMode === 'detailed' && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1 mt-1 cursor-help">
-                    <Info className="h-3 w-3 text-slate-400" />
-                    <p className="text-xs text-slate-500">{status}</p>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>محدوده نرمال: {normalRange}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </div>
-      </div>
-      <div className="text-left flex items-center gap-2">
-        <div>
-          <Badge className="bg-[#e6bf7a]/20 text-[#c19a48] border-[#e6bf7a]/30 mb-1">
-            {dueDate}
-          </Badge>
-          {viewMode === 'compact' && (
-            <p className="text-xs text-slate-500 text-left">{status}</p>
-          )}
-        </div>
-        <Button 
-          size="icon" 
-          variant="ghost" 
-          className="h-8 w-8 rounded-full text-slate-500 hover:bg-[#e6bf7a]/20 hover:text-[#c19a48]"
-          onClick={onAction}
-          aria-label="ثبت اندازه‌گیری"
-        >
-          <PlusCircle className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// Enhanced component for future tasks with better UI/UX
-interface EnhancedFutureTaskItemProps {
-  id: string;
-  title: string;
-  time: string;
-  icon: React.ReactNode;
-  type: string;
-  priority: string;
-  viewMode: 'detailed' | 'compact';
-  onAction: () => void;
-  isToday: boolean;
-}
-
-function EnhancedFutureTaskItem({ 
-  id, title, time, icon, type, priority, viewMode, onAction, isToday 
-}: EnhancedFutureTaskItemProps) {
-  // Determine badge color based on priority
-  const priorityColorMap: Record<string, string> = {
-    'ضروری': 'bg-red-100 text-red-600 border-red-200',
-    'مهم': 'bg-amber-100 text-amber-600 border-amber-200',
-    'متوسط': 'bg-blue-100 text-blue-600 border-blue-200',
-    'عادی': 'bg-green-100 text-green-600 border-green-200'
+          return { ...prevData, selectedMetricIds: newSelectedIds };
+      });
   };
-  
-  const badgeClassName = priorityColorMap[priority] || 'bg-gray-100 text-gray-600 border-gray-200';
-  
-  // Today items get special treatment
-  const todayStyle = isToday 
-    ? viewMode === 'detailed' 
-      ? 'border-r-4 border-r-amber-400 bg-amber-50/30' 
-      : 'border-r-4 border-r-amber-400'
-    : '';
+
+  // Filter metrics to display based on selection
+  const displayedMetrics = dashboardData.allMetrics.filter(metric =>
+    dashboardData.selectedMetricIds.includes(metric.id)
+  );
 
   return (
-    <div className={`flex items-center justify-between p-4 hover:bg-[#e6bf7a]/5 transition-colors ${todayStyle}`}>
-      <div className="flex items-center gap-3">
-        <div className="bg-[#e6bf7a]/15 p-2 rounded-full">
-          {icon}
-        </div>
-        <div>
-          <h3 className="font-medium text-slate-800">{title}</h3>
-          <div className="flex items-center text-sm text-slate-600 gap-2 mt-1">
-            <Clock className="h-3 w-3" />
-            <span>{time}</span>
-          </div>
-        </div>
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">داشبورد سلامت</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Stats Section */}
+        <ErrorBoundary fallback={<div>خطا در بارگذاری آمار</div>}>
+          <Suspense fallback={<StatsLoading />}>
+            <DashboardStats />
+          </Suspense>
+        </ErrorBoundary>
+        
+        {/* Health Metrics Chart */}
+        <ErrorBoundary fallback={<div>خطا در بارگذاری نمودار</div>}>
+          <Suspense fallback={<ChartLoading />}>
+            <HealthMetricsChart />
+          </Suspense>
+        </ErrorBoundary>
       </div>
-      <div className="text-left flex items-center gap-2">
-        <div>
-          <Badge className={`${badgeClassName} mb-1`}>
-            {priority}
-          </Badge>
-          {viewMode === 'detailed' && (
-            <p className="text-xs text-slate-500 text-left">{type}</p>
-          )}
-        </div>
-        <Button 
-          size="icon" 
-          variant="ghost" 
-          className="h-8 w-8 rounded-full text-slate-500 hover:bg-green-100 hover:text-green-600"
-          onClick={onAction}
-          aria-label="انجام شد"
-        >
-          <CheckCircle className="h-4 w-4" />
-        </Button>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        {/* Recent Medications */}
+        <ErrorBoundary fallback={<div>خطا در بارگذاری اطلاعات دارویی</div>}>
+          <Suspense fallback={<ListLoading />}>
+            <RecentMedications />
+          </Suspense>
+        </ErrorBoundary>
+        
+        {/* Upcoming Appointments */}
+        <ErrorBoundary fallback={<div>خطا در بارگذاری قرارهای پزشکی</div>}>
+          <Suspense fallback={<ListLoading />}>
+            <UpcomingAppointments />
+          </Suspense>
+        </ErrorBoundary>
       </div>
     </div>
   );
-} 
+}
